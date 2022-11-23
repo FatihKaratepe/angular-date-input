@@ -3,6 +3,10 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import * as moment from 'moment';
 
+/**
+ * @param name    -> error name/title
+ * @param message -> error message
+ */
 export interface DateInputError {
   name?: string;
   message?: string;
@@ -15,7 +19,17 @@ export interface DateInputError {
 })
 
 export class DateInputComponent implements OnInit, OnDestroy {
-  @Input() name?: string;
+  /**
+   * @param name                  -> name for required error message
+   * @param control               -> form control for access parent form control
+   * @param readOnly              -> readonly prop
+   * @param minDate               -> minimum date validation
+   * @param maxDate               -> maximum date validation
+   * @param minDateErrorContent   -> minimum date validation error message
+   * @param maxDateErrorContent   -> maximum date validation error message
+   * @param isDateOfBirth         -> year validation
+   */
+  @Input() name!: string;
   @Input() control!: FormControl;
   @Input() readOnly?: boolean = false;
   @Input() minDate?: string | FormControl | Observable<string>;
@@ -24,6 +38,13 @@ export class DateInputComponent implements OnInit, OnDestroy {
   @Input() maxDateErrorContent?: string;
   @Input() isDateOfBirth?: boolean;
 
+  /**
+   * @param pasteError    -> when user tried paste into date input show error message
+   * @param errorArray    -> handle all errors easyly
+   * @param minDateVal    -> minimum date value
+   * @param maxDateVal    -> maximum date value
+   * @param unsubscribe$  -> for unsubscribe all subscri
+   */
   pasteError?: boolean = false;
   errorArray?: DateInputError[] = [];
   minDateVal?: string;
@@ -35,7 +56,6 @@ export class DateInputComponent implements OnInit, OnDestroy {
     month: new FormControl('', [Validators.required]),
     year: new FormControl('', [Validators.required]),
   })
-
 
   get day() { return this.dateForm.get('day') as FormControl }
   get month() { return this.dateForm.get('month') as FormControl }
@@ -49,6 +69,9 @@ export class DateInputComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    /**
+     * * minDate prop parsing
+     */
     if (this.minDate) {
       if (this.minDate instanceof FormControl) {
         this.minDateVal = this.minDate.value;
@@ -61,6 +84,9 @@ export class DateInputComponent implements OnInit, OnDestroy {
       };
     };
 
+    /**
+     * * maxDate prop parsing
+     */
     if (this.maxDate) {
       if (this.maxDate instanceof FormControl) {
         this.maxDateVal = this.maxDate.value;
@@ -73,8 +99,14 @@ export class DateInputComponent implements OnInit, OnDestroy {
       };
     };
 
+    /**
+     * * dateForm value change subscription
+     */
     this.dateForm.valueChanges.pipe(takeUntil(this.unsubscribe$)).subscribe(formValues => {
 
+      /**
+       * * if day value equals "00"
+       */
       if (formValues.day === '00') {
         if (!this.findSameError('invalidDay')) {
           this.errorArray?.push({
@@ -88,6 +120,10 @@ export class DateInputComponent implements OnInit, OnDestroy {
           this.errorArray?.splice(errorIndex!, 1);
         }
       }
+
+      /**
+       * * if month value equals "00"
+       */
       if (formValues.month === '00') {
         if (!this.findSameError('invalidMonth')) {
           this.errorArray?.push({
@@ -102,6 +138,13 @@ export class DateInputComponent implements OnInit, OnDestroy {
         }
       }
 
+      /**
+       * * if date input has isDateOfBirth prop
+       * * year cant starts with "0"
+       * ******
+       * * if date input has not isDateOfBirth prop
+       * * year cant starts with "0" and "1"
+       */
       const dateOfBirthControl = this.isDateOfBirth ? formValues.year?.startsWith('0') : formValues.year?.startsWith('0') || formValues.year?.startsWith('1');
 
       if (dateOfBirthControl) {
@@ -118,6 +161,9 @@ export class DateInputComponent implements OnInit, OnDestroy {
         }
       }
 
+      /**
+       * * detect dateForm fill status 
+       */
       if ((formValues.day?.length === 2 && formValues.month?.length === 2 && formValues.year?.length === 4) && (formValues.day !== '00' && formValues.month !== '00' && !(dateOfBirthControl))) {
         this.setDateValue();
         if (this.minDateVal || this.maxDateVal) {
@@ -132,7 +178,10 @@ export class DateInputComponent implements OnInit, OnDestroy {
     })
   }
 
-
+  /**
+    * * if date input has mindate prop
+    * * validate input with moment isBefore function 
+    */
   minDateControl() {
     if (moment(this.control.value, 'MM-DD-YYYY').isBefore(this.minDateVal)) {
       if (!this.findSameError('minDateError')) {
@@ -150,6 +199,10 @@ export class DateInputComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * * if date input has maxdate prop
+   * * validate input with moment isAfter function 
+   */
   maxDateControl() {
     if (moment(this.control.value, 'MM-DD-YYYY').isAfter(this.maxDateVal)) {
       if (!this.findSameError('maxDateError')) {
@@ -167,23 +220,40 @@ export class DateInputComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * * set date form values to parent form control
+   */
   setDateValue(): void {
     const formValues = this.dateForm.getRawValue();
     this.control.patchValue(formValues.month + '-' + formValues.day + '-' + formValues.year);
   }
 
+  /**
+   * * block paste for date input
+   */
   disablePaste(event: any) {
     if (!this.pasteError) this.pasteError = true;
     event.preventDefault();
   }
 
+  /**
+   * @param errorName -> error name to find
+   * @returns         -> true if errorName is found in errorArray, false otherwise 
+   */
   findSameError(errorName: string): boolean {
     let sameError = this.errorArray?.find(error => error.name === errorName);
     if (sameError) return true;
     return false;
   }
 
-  goNextOrPreviusInput(event: any, maxLength: number) {
+  /**
+   * * if user delete value and there is an input before the empty input
+   * * focus the previous input
+   * ******
+   * * if user enter value and there is an input after the filled input
+   * * focus the next input
+   */
+  goNextOrPreviousInput(event: any, maxLength: number) {
     let nextInput = event.srcElement.nextElementSibling;
     let prevInput = event.srcElement.previousElementSibling;
     if (event.code === 'Backspace') {
@@ -200,6 +270,10 @@ export class DateInputComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * * if user enters february in month input 
+   * * block entries that start with 3 for the day input.
+   */
   blockNumbersForDay(event: any) {
     if (this.month.value === '02') {
       if (event.target.value.length === 0 && event.key === '3') {
@@ -208,8 +282,12 @@ export class DateInputComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * * if user focusout from an empty input
+   * * mark the parent form control as touched and dirty.
+   */
   inputFocusOut(event: any, requiredValueLength: number) {
-    if(event.target.value.length < requiredValueLength) {
+    if (event.target.value.length < requiredValueLength) {
       this.control.markAsTouched()
       this.control.markAsDirty()
     }
