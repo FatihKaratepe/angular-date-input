@@ -70,6 +70,29 @@ export class DateInputComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     /**
+     * * check form control value with moment's isValid function
+     * * for february month (28/29)
+     */
+    this.control.valueChanges.pipe(takeUntil(this.unsubscribe$)).subscribe(controlValue => {
+      if (controlValue.length > 0) {
+        if (!moment(controlValue, 'MM-DD-YYYY').isValid()) {
+          this.control.patchValue('')
+          if (!this.findSameError('invalidFeb')) {
+            this.errorArray?.push({
+              name: 'invalidFeb',
+              message: 'Please enter a valid date.',
+            });
+          };
+        } else {
+          if (this.findSameError('invalidFeb')) {
+            const errorIndex = this.errorArray?.map(e => e.name).indexOf('invalidFeb');
+            this.errorArray?.splice(errorIndex!, 1);
+          }
+        }
+      }
+    })
+
+    /**
      * * minDate prop parsing
      */
     if (this.minDate) {
@@ -111,7 +134,7 @@ export class DateInputComponent implements OnInit, OnDestroy {
         if (!this.findSameError('invalidDay')) {
           this.errorArray?.push({
             name: 'invalidDay',
-            message: 'Please enter a valid day',
+            message: 'Please enter a valid day.',
           });
         };
       } else {
@@ -128,7 +151,7 @@ export class DateInputComponent implements OnInit, OnDestroy {
         if (!this.findSameError('invalidMonth')) {
           this.errorArray?.push({
             name: 'invalidMonth',
-            message: 'Please enter a valid month',
+            message: 'Please enter a valid month.',
           });
         };
       } else {
@@ -151,7 +174,7 @@ export class DateInputComponent implements OnInit, OnDestroy {
         if (!this.findSameError('invalidYear')) {
           this.errorArray?.push({
             name: 'invalidYear',
-            message: 'Please enter a valid year',
+            message: 'Please enter a valid year.',
           });
         };
       } else {
