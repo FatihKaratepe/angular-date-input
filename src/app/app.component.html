@@ -1,0 +1,17 @@
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <form [formGroup]="testForm">
+        <div class="row">
+          <div class="col-8">
+            <input type="text" class="form-control" formControlName="name" [ngClass]="{ 'is-invalid': name?.invalid && (name?.dirty || name?.touched) }">
+          </div>
+          <div class="col-8">
+            <app-date-input [name]="'Date Input'" [control]="date"></app-date-input>
+            {{date.value}}
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

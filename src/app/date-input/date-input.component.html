@@ -1,0 +1,24 @@
+<div class="date-input-container mt-3" [ngClass]="{'is-invalid-date': (control.invalid && (control.touched || control.dirty)) || errorArray!.length > 0 }">
+    <form [formGroup]="dateForm">
+        <input type="text" class="form-control mounth-input" placeholder="MM" [readonly]="readOnly" [leadZeroDateTime]="true"
+            formControlName="month" mask="M0" (paste)="disablePaste($event)" (keyup)="goNextOrPreviusInput($event, 2)">
+        <input type="text" class="form-control day-input" placeholder="DD" [readonly]="readOnly" formControlName="day" [leadZeroDateTime]="true"
+            mask="d0" (paste)="disablePaste($event)" (keyup)="goNextOrPreviusInput($event, 2)" (keypress)="blockNumbersForDay($event)">
+        <input type="text" class="form-control year-input" placeholder="YYYY" [readonly]="readOnly"
+            formControlName="year" mask="0000" (paste)="disablePaste($event)" (keyup)="goNextOrPreviusInput($event, 4)">
+    </form>
+    <input [formControl]="control!" type="hidden">
+</div>
+
+<div *ngIf="errorArray!.length>0" class="text-danger mt-2">
+    <div *ngFor="let error of errorArray">
+        <div>{{error.message}}</div>
+    </div>
+</div>
+<div *ngIf="pasteError" class="text-danger" [ngClass]="errorArray!.length === 0 ? 'mt-2' : ''">
+    You cannot paste into date field.
+</div>
+
+<div *ngIf="control.invalid && (control.touched || control.dirty)" class="text-danger" [ngClass]="(errorArray!.length === 0 || !pasteError) ? 'mt-2' : ''">
+    {{name}} is required.
+</div>

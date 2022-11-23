@@ -1,0 +1,90 @@
+:host {
+    width: 100%;
+}
+
+
+.input-group {
+    :host {
+        flex: 1 1;
+    }
+
+    &.with-icon {
+        :host {
+            form {
+                input {
+                    &:nth-child(1) {
+                        border-top-left-radius: 0;
+                        border-bottom-left-radius: 0;
+                    }
+                }
+
+            }
+        }
+    }
+
+    &.h-39 {
+        :host {
+            form {
+                height: 38px;
+
+                input {
+                    height: 38px;
+                }
+
+            }
+        }
+    }
+}
+
+.date-input-container {
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    display: flex;
+    width: 100%;
+    transition: border-color 0.15s ease-in-out;
+
+    form {
+        display: flex;
+        flex: 1 1 auto;
+
+        input {
+            border: none;
+            border-radius: 0;
+            box-shadow: none !important;
+            padding: 0.375rem 3px 0.375rem 5px;
+
+            &:nth-child(1),
+            &:nth-child(2) {
+                border-right: 1px solid #ced4da;
+            }
+
+            &:nth-child(1) {
+                border-top-left-radius: 0.25rem;
+                border-bottom-left-radius: 0.25rem;
+            }
+
+            &:nth-child(3) {
+                border-top-right-radius: 0.25rem;
+                border-bottom-right-radius: 0.25rem;
+            }
+
+            &.day-input,
+            &.mounth-input {
+                flex: 1 1 55%;
+            }
+        }
+    }
+
+    &.is-invalid-date {
+        border: 1px solid #dc3545;
+
+        form input {
+
+            &:nth-child(1),
+            &:nth-child(2) {
+                border-right: 1px solid #dc3545;
+            }
+        }
+    }
+
+}
