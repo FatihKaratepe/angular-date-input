@@ -71,7 +71,6 @@ export class DateInputComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     /**
      * * check form control value with moment's isValid function
-     * * for february month (28/29)
      */
     this.control.valueChanges.pipe(takeUntil(this.unsubscribe$)).subscribe(controlValue => {
       if (controlValue.length > 0) {
