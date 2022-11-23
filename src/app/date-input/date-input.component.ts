@@ -208,4 +208,11 @@ export class DateInputComponent implements OnInit, OnDestroy {
     }
   }
 
+  inputFocusOut(event: any, requiredValueLength: number) {
+    if(event.target.value.length < requiredValueLength) {
+      this.control.markAsTouched()
+      this.control.markAsDirty()
+    }
+  }
+
 }
