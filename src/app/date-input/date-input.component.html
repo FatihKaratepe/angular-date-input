@@ -7,7 +7,7 @@
         <input type="text" class="form-control year-input" placeholder="YYYY" [readonly]="readOnly"
             formControlName="year" mask="0000" (paste)="disablePaste($event)" (keyup)="goNextOrPreviusInput($event, 4)">
     </form>
-    <input [formControl]="control!" type="hidden">
+    <input [formControl]="control" type="hidden">
 </div>
 
 <div *ngIf="errorArray!.length>0" class="text-danger mt-2">

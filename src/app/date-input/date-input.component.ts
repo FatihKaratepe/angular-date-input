@@ -1,6 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Observable, Subject, takeUntil } from 'rxjs';
 import * as moment from 'moment';
 
 export interface DateInputError {
@@ -14,8 +14,7 @@ export interface DateInputError {
   styleUrls: ['./date-input.component.scss']
 })
 
-export class DateInputComponent implements OnInit {
-
+export class DateInputComponent implements OnInit, OnDestroy {
   @Input() name?: string;
   @Input() control!: FormControl;
   @Input() readOnly?: boolean = false;
@@ -29,6 +28,7 @@ export class DateInputComponent implements OnInit {
   errorArray?: DateInputError[] = [];
   minDateVal?: string;
   maxDateVal?: string;
+  unsubscribe$ = new Subject<void>();
 
   dateForm = new FormGroup({
     day: new FormControl('', [Validators.required]),
@@ -43,13 +43,17 @@ export class DateInputComponent implements OnInit {
 
   constructor() { }
 
+  ngOnDestroy() {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+  }
+
   ngOnInit(): void {
     if (this.minDate) {
       if (this.minDate instanceof FormControl) {
         this.minDateVal = this.minDate.value;
       } else if (this.minDate instanceof Observable) {
-        // TODO: Unsubscibe
-        this.minDate.subscribe(data => {
+        this.minDate.pipe(takeUntil(this.unsubscribe$)).subscribe(data => {
           this.minDateVal = data;
         })
       } else {
@@ -61,7 +65,7 @@ export class DateInputComponent implements OnInit {
       if (this.maxDate instanceof FormControl) {
         this.maxDateVal = this.maxDate.value;
       } else if (this.maxDate instanceof Observable) {
-        this.maxDate.subscribe(data => {
+        this.maxDate.pipe(takeUntil(this.unsubscribe$)).subscribe(data => {
           this.maxDateVal = data;
         })
       } else {
@@ -69,7 +73,7 @@ export class DateInputComponent implements OnInit {
       };
     };
 
-    this.dateForm.valueChanges.subscribe(formValues => {
+    this.dateForm.valueChanges.pipe(takeUntil(this.unsubscribe$)).subscribe(formValues => {
 
       if (formValues.day === '00') {
         if (!this.findSameError('invalidDay')) {
