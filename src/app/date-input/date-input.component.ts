@@ -77,15 +77,15 @@ export class DateInputComponent implements OnInit, OnDestroy {
       if (controlValue.length > 0) {
         if (!moment(controlValue, 'MM-DD-YYYY').isValid()) {
           this.control.patchValue('')
-          if (!this.findSameError('invalidFeb')) {
+          if (!this.findSameError('invalidDate')) {
             this.errorArray?.push({
-              name: 'invalidFeb',
+              name: 'invalidDate',
               message: 'Please enter a valid date.',
             });
           };
         } else {
-          if (this.findSameError('invalidFeb')) {
-            const errorIndex = this.errorArray?.map(e => e.name).indexOf('invalidFeb');
+          if (this.findSameError('invalidDate')) {
+            const errorIndex = this.errorArray?.map(e => e.name).indexOf('invalidDate');
             this.errorArray?.splice(errorIndex!, 1);
           }
         }
